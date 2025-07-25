@@ -82,9 +82,14 @@ export class GenAIService {
    * Parses a natural language transcript into a structured command using the AI model.
    * @param transcript The user's voice transcript.
    * @param getNewToken A function to get a fresh authentication token.
+   * @param onParsingComplete Optional callback to be called when parsing is complete.
    * @returns A promise that resolves to the parsed command object.
    */
-  static async parseCommand(transcript: string, getNewToken: () => Promise<{ name: string }>): Promise<any> {
+  static async parseCommand(
+    transcript: string, 
+    getNewToken: () => Promise<{ name: string }>,
+    onParsingComplete?: () => void
+  ): Promise<any> {
     // In a real application, you would fetch the menu list from your backend.
     const dummy_menu = [
       { "name": "ayam goreng", "price": 18000 },
@@ -99,11 +104,17 @@ export class GenAIService {
     const prompt = createCommandParserPrompt(transcript, ((menu_list as any).data as any)?.menu?.length >= 1 ? ((menu_list as any).data as any).menu : dummy_menu);
     const responseText = await this.getLiveResponse(prompt, getNewToken);
 
-    // setIsProcessing(false);
-
     // Clean up the response to get a valid JSON string
     const jsonString = responseText.replace(/```json|```/g, '').trim();
-    return JSON.parse(jsonString);
+    const parsedCommand = JSON.parse(jsonString);
+    
+    // Call the callback to indicate parsing is complete (this replaces the commented setIsProcessing(false))
+    if (onParsingComplete) {
+      console.log('🎯 GenAI parsing complete, calling onParsingComplete callback');
+      onParsingComplete();
+    }
+    
+    return parsedCommand;
   }
 
   /**

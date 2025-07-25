@@ -447,7 +447,14 @@ export function useVoiceCommands(getNewToken: () => Promise<{ name: string }>) {
     let feedbackMessage = "Maaf, terjadi kesalahan.";
     
     try {
-      const command = await VoiceProcessor.processVoiceCommand(commandText, getNewToken);
+      const command = await VoiceProcessor.processVoiceCommand(
+        commandText, 
+        getNewToken,
+        () => {
+          console.log('🎯 Parsing completed, setting isProcessing to false');
+          setIsProcessing(false);
+        }
+      );
       setLastCommand({ ...command, timestamp: new Date().getTime() });
 
       // Clear previous results based on the new command type
