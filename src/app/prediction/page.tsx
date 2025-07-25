@@ -9,8 +9,6 @@ import {
   ArrowLeft, 
   Brain, 
   Package, 
-  Users, 
-  Tag, 
   TrendingUp, 
   Calendar, 
   CloudSun,
@@ -18,7 +16,6 @@ import {
   ChevronRight,
   Info,
   CheckCircle2,
-  AlertTriangle,
   RefreshCw
 } from "lucide-react";
 
@@ -111,7 +108,7 @@ export default function PredictionPage() {
     setError(null);
     
     try {
-      const testToken = await getNewToken();
+      await getNewToken(); // Validate token is available
       const predictions = await GenAIService.getSupplyPrediction(getNewToken);
       
       // Save to state
@@ -298,7 +295,7 @@ export default function PredictionPage() {
         setPredictionData(parsedData);
         setLastGenerated(parsedDate);
         setHasGenerated(true);
-      } catch (error) {
+      } catch {
         // Clear corrupted data
         localStorage.removeItem('warteg_predictions');
         localStorage.removeItem('warteg_predictions_timestamp');
