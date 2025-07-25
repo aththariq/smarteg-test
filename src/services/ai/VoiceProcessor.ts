@@ -211,16 +211,25 @@ export class VoiceProcessor {
   /**
    * Process voice command and extract intent using GenAI
    */
-  static async processVoiceCommand(transcript: string, getNewToken: () => Promise<{ name: string }>): Promise<any> {
+  static async processVoiceCommand(
+    transcript: string, 
+    getNewToken: () => Promise<{ name: string }>,
+    onParsingComplete?: () => void
+  ): Promise<any> {
     try {
       this.isListening = false;
       VoiceProcessor.stopListening(this.recognition);
-      const command = await GenAIService.parseCommand(transcript, getNewToken);
+      const command = await GenAIService.parseCommand(transcript, getNewToken, onParsingComplete);
       console.log("✅ Parsed Command:", command);
       return command;
     } catch (error) {
       
       console.error("❌ Failed to process command with GenAI:", error);
+      // If there's a callback and GenAI fails, still call it to reset isProcessing
+      if (onParsingComplete) {
+        console.log('🎯 GenAI failed, calling onParsingComplete callback anyway');
+        onParsingComplete();
+      }
       // Fallback to simpler local processing if GenAI fails
       return this.localProcessVoiceCommand(transcript);
     }
